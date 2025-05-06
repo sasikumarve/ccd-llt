@@ -65,11 +65,12 @@ This project uses a **multi-stage Docker build** to optimize the size and securi
 
 ### 🔧 Build Stages
 
-#### 🧱 Stage 1: Build with Maven
+### 🐳 Docker Multi-Stage Build
 
-Uses an official Maven image to compile the Java source code and create a JAR file:
+This project uses a **multi-stage Docker build** to efficiently compile and package a Java application into a minimal runtime image.
 
 ```dockerfile
+# 🧱 Stage 1: Build with Maven
 FROM maven:3.9.4-eclipse-temurin-17 AS builder
 
 WORKDIR /app
@@ -77,14 +78,13 @@ COPY . .
 
 RUN mvn clean package -DskipTests
 
-#### 🚀 Stage 2: Run with Minimal JDK
-
-This stage uses a lightweight base image to run the packaged Java application. It copies only the compiled JAR from the build stage, resulting in a smaller and more secure image.
-
-```dockerfile
+# 🚀 Stage 2: Run with Minimal JDK
 FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
+
+
