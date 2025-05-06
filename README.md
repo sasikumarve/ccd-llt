@@ -1,33 +1,79 @@
-# Containers and Cloud Devops - LLT
-**CCD LLT project**
+# 🚀 Containers and Cloud DevOps - LLT (CCD LLT)
 
-**Pipeline Design**
-Code check-in to "main" branch triggers the workflow.
+This project demonstrates a secure, automated CI/CD pipeline that builds and deploys Docker images to AWS ECR using GitHub Actions and AWS OpenID Connect (OIDC) authentication.
 
-**Steps involved:**
-1. Checkout Code
-2. Configure AWS credentials from OIDC
-3. Ensure ECR repository exists
-4. Login to AWS ECR
-5. Build Docker image (Multi-stage Docker build)
-6. Tag Docker image
-7. Push Docker image to Amazon ECR
+---
 
-**IAM Role Design**
+## 🔁 Pipeline Overview
 
-Setup a Role in IAM of AWS with Trust relationships pointing to the following.
-1. githubusercontent token
-2. github repo path with brancch information
-3. AWS Identity provider Audience ID.
-   
-The IAM role should be able to pull information from github using secure credentials and build an Image in the ECR.
+The GitHub Actions pipeline is triggered on every push to the `main` branch and follows these steps:
 
-**Challenges faced**
+1. ✅ **Checkout code**  
+2. 🔐 **Configure AWS credentials using OIDC**
+3. 🗃️ **Ensure the target ECR repository exists**
+4. 🔑 **Authenticate Docker with Amazon ECR**
+5. 🛠️ **Build Docker image using a multi-stage build**
+6. 🏷️ **Tag the Docker image**
+7. 📤 **Push the Docker image to Amazon ECR**
 
-None
+---
 
-**Multi-Stage build: working**
+## 🔐 IAM Role Design for GitHub OIDC
 
-*Stages:*
-1. Build the java code using maven "mvn clean package"
-2. Run the bundled jar in "eclipse-temurin:17-jdk-alpine" base image.
+To enable secure access from GitHub to AWS, an IAM Role is created with the following trust policy conditions:
+
+- **OIDC Provider**: `token.actions.githubusercontent.com`
+- **Audience**: `sts.amazonaws.com`
+- **Repository Restriction**:  
+  Allows only a specific GitHub organization and repository (with optional branch) to assume the role via:
+
+  ```json
+  "Condition": {
+    "StringLike": {
+      "token.actions.githubusercontent.com:sub": "repo:<your-org>/<your-repo>:*"
+    }
+  }
+
+---
+
+## ⚠️ Challenges Faced
+
+During the implementation of the CI/CD pipeline and Docker-based deployment, the following considerations and learning moments were noted:
+
+### ✅ GitHub OIDC Integration with AWS
+
+- **Challenge**: Understanding how GitHub’s OpenID Connect (OIDC) integrates with AWS IAM roles was initially complex.
+- **Resolution**: Successfully set up a trust policy to allow secure authentication using GitHub OIDC without static AWS credentials.
+
+### ✅ ECR Repository Not Visible
+
+- **Challenge**: Image push appeared successful in GitHub Actions logs, but the image was not visible in the ECR console.
+- **Resolution**: Added a step to explicitly create the repository if it doesn't exist, and used unique tags (e.g., `${{ github.sha }}`) to ensure pushes are not silently skipped.
+
+### 🐳 Docker Image Optimization
+
+- **Challenge**: Ensuring the final Docker image was optimized and minimal.
+- **Resolution**: Implemented a multi-stage Docker build to separate the Maven build process from the runtime container, significantly reducing image size.
+
+> Overall, no blockers were encountered, but attention to detail in IAM policies, tagging, and repository setup was key to successful deployment.
+
+---
+
+## 🐳 Docker Multi-Stage Build
+
+This project uses a **multi-stage Docker build** to optimize the size and security of the final Docker image. The first stage compiles the Java code using Maven, and the second stage packages the compiled JAR into a lightweight runtime image.
+
+### 🔧 Build Stages
+
+#### 🧱 Stage 1: Build with Maven
+
+Uses an official Maven image to compile the Java source code and create a JAR file:
+
+```dockerfile
+FROM maven:3.9.4-eclipse-temurin-17 AS builder
+
+WORKDIR /app
+COPY . .
+
+RUN mvn clean package -DskipTests
+
