@@ -1,0 +1,42 @@
+name: Build and Push Docker Image to ECR
+
+on:
+  push:
+    branches:
+      - DEVELOPMENT  # 🔁 Trigger on push to 'development' branch
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::864899869180:role/CCD-LLT
+          role-session-name: CCD-LLT
+          aws-region: ap-south-1
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region ap-south-1 | \
+          docker login --username AWS --password-stdin 864899869180.dkr.ecr.ap-south-1.amazonaws.com
+
+      - name: Build Docker image
+        run: |
+          docker build -t ccd-llt-java-app .
+
+      - name: Tag Docker image
+        run: |
+          docker tag ccd-llt-java-app:latest 864899869180.dkr.ecr.ap-south-1.amazonaws.com/ccd-llt-java-app:latest
+
+      - name: Push Docker image to Amazon ECR
+        run: |
+          docker push 864899869180.dkr.ecr.ap-south-1.amazonaws.com/ccd-llt-java-app:latest
