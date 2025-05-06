@@ -22,7 +22,7 @@ Setup a Role in IAM of AWS with Trust relationships pointing to the following.
    
 The IAM role should be able to pull information from github using secure credentials and build an Image in the ECR.
 
-**Multi-Stage build: working**.
+**Multi-Stage build: working**
 
 *Stages:*
 1. Build the java code using maven "mvn clean package"
