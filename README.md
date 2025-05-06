@@ -77,3 +77,14 @@ COPY . .
 
 RUN mvn clean package -DskipTests
 
+#### 🚀 Stage 2: Run with Minimal JDK
+
+This stage uses a lightweight base image to run the packaged Java application. It copies only the compiled JAR from the build stage, resulting in a smaller and more secure image.
+
+```dockerfile
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
