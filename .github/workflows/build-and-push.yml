@@ -39,4 +39,4 @@ jobs:
 
       - name: Push Docker image to Amazon ECR
         run: |
-          docker push 849276828792.dkr.ecr.ap-south-1.amazonaws.com/ccd-llt-java-app:latest
+          docker push 849276828792.dkr.ecr.ap-south-1.amazonaws.com/ccd-llt:latest
