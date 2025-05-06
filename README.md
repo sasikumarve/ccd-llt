@@ -22,6 +22,10 @@ Setup a Role in IAM of AWS with Trust relationships pointing to the following.
    
 The IAM role should be able to pull information from github using secure credentials and build an Image in the ECR.
 
+**Challenges faced**
+
+None
+
 **Multi-Stage build: working**
 
 *Stages:*
