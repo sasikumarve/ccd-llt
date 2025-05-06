@@ -31,11 +31,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ccd-llt-java-app .
+          docker build -t ccd-llt .
 
       - name: Tag Docker image
         run: |
-          docker tag ccd-llt-java-app:latest 849276828792.dkr.ecr.ap-south-1.amazonaws.com/ccd-llt-java-app:latest
+          docker tag ccd-llt:latest 849276828792.dkr.ecr.ap-south-1.amazonaws.com/ccd-llt:latest
 
       - name: Push Docker image to Amazon ECR
         run: |
