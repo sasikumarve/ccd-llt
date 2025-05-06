@@ -3,6 +3,7 @@
 
 **Pipeline Design**
 Code check-in to "main" branch triggers the workflow.
+
 **Steps involved:**
 1. Checkout Code
 2. Configure AWS credentials from OIDC
